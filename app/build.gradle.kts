@@ -1,6 +1,6 @@
 plugins {
   alias(libs.plugins.android.application)
-  alias(libs.plugins.kotlin.compose)
+  alias(libs.plugins.kotlin.android)
   alias(libs.plugins.google.devtools.ksp)
 }
 
@@ -16,6 +16,14 @@ android {
     versionName = "1.0"
 
     testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+  }
+
+  buildFeatures {
+    compose = true
+  }
+
+  composeOptions {
+    kotlinCompilerExtensionVersion = "1.5.8"
   }
 
   signingConfigs {
@@ -56,11 +64,11 @@ android {
     }
   }
   compileOptions {
-    sourceCompatibility = JavaVersion.VERSION_11
-    targetCompatibility = JavaVersion.VERSION_11
+    sourceCompatibility = JavaVersion.VERSION_17
+    targetCompatibility = JavaVersion.VERSION_17
   }
-  buildFeatures {
-    compose = true
+  kotlinOptions {
+    jvmTarget = "17"
   }
   testOptions { unitTests { isIncludeAndroidResources = true } }
 }
