@@ -1,32 +1,19 @@
 ```
-# Gradle
+# Dependencies
 .gradle/
 build/
-target/
 
-# Local configuration file (sdk path, etc)
-local.properties
+# Logs and temp files
+*.log
+*.tmp
+*.swp
 
 # Environment
 .env
 .env.local
 *.env.*
 
-# Logs
-*.log
-
-# IDE
+# Editors
 .vscode/
 .idea/
-*.swp
-*.swo
-*.tmp
-
-# Dependencies
-node_modules/
-venv/
-.venv/
-__pycache__/
-.mypy_cache/
-.pytest_cache/
 ```

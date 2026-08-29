@@ -574,6 +574,8 @@ object TransferManager {
                     } else {
                         updateFileProgress(fileId, 0, TransferStatus.FAILED, context.getString(R.string.error_file_not_found))
                     }
+                } else {
+                    Log.e(TAG, "File not found in list: $fileId")
                 }
             }
         } catch (e: Exception) {
