@@ -67,15 +67,28 @@ object TransferManager {
     private var wifiLock: WifiManager.WifiLock? = null
     private var appContext: Context? = null
     private var lastWakeLockRefreshTime = 0L
+    private const val MAX_WAKELOCK_DURATION_MS = 30 * 60 * 1000L // 30 minutes max
+    private var wakeLockStartTime = 0L
 
     fun pokeWakeLock() {
         val now = System.currentTimeMillis()
+        
+        // Check if wakelock has exceeded maximum duration
+        if (wakeLockStartTime > 0 && (now - wakeLockStartTime) > MAX_WAKELOCK_DURATION_MS) {
+            Log.w(TAG, "WakeLock exceeded max duration, releasing")
+            wakeLock?.let {
+                if (it.isHeld) it.release()
+            }
+            wakeLock = null
+            return
+        }
+        
         if (now - lastWakeLockRefreshTime > 15000L) { // refresh at most once every 15 seconds
             lastWakeLockRefreshTime = now
             try {
                 wakeLock?.let {
                     if (!it.isHeld) {
-                        it.acquire()
+                        it.acquire(60000) // Re-acquire with 60 second timeout
                         Log.d(TAG, "Wake lock was not held, acquired successfully")
                     }
                 }
@@ -105,6 +118,7 @@ object TransferManager {
         try {
             appContext = context.applicationContext
             lastWakeLockRefreshTime = System.currentTimeMillis()
+            wakeLockStartTime = System.currentTimeMillis()
 
             val wifiManager = context.applicationContext.getSystemService(Context.WIFI_SERVICE) as WifiManager
             multicastLock = wifiManager.createMulticastLock("SwipeMulticastLock").apply {
@@ -129,7 +143,7 @@ object TransferManager {
             val powerManager = context.applicationContext.getSystemService(Context.POWER_SERVICE) as PowerManager
             wakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "Swipe:TransferWakeLock").apply {
                 setReferenceCounted(false)
-                acquire() // Acquire indefinitely to avoid timing out during long transfers
+                acquire() // Acquire with timeout protection
             }
             Log.d(TAG, "Wake lock acquired successfully")
         } catch (e: Exception) {
@@ -1550,7 +1564,7 @@ object TransferManager {
             val spec = javax.crypto.spec.PBEKeySpec(
                 code.toCharArray(),
                 salt,
-                1000, // 1000 iterations to stretch entropy
+                65536, // Increased iterations for better security
                 256   // 256 bits AES key
             )
             val keyBytes = secretKeyFactory.generateSecret(spec).encoded
