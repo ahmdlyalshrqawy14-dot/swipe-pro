@@ -33,7 +33,7 @@ interface TransferHistoryDao {
     suspend fun clearHistory()
 }
 
-@Database(entities = [TransferHistory::class], version = 1, exportSchema = false)
+@Database(entities = [TransferHistory::class], version = 2, exportSchema = false)
 abstract class AppDatabase : RoomDatabase() {
     abstract fun transferHistoryDao(): TransferHistoryDao
 
@@ -47,7 +47,9 @@ abstract class AppDatabase : RoomDatabase() {
                     context.applicationContext,
                     AppDatabase::class.java,
                     "swipe_database"
-                ).fallbackToDestructiveMigration().build()
+                )
+                .addMigrations() // Add migrations here if needed in future
+                .build()
                 INSTANCE = instance
                 instance
             }
